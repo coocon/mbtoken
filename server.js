@@ -11,6 +11,15 @@ var http = require('http');
 var port = 10001;
 var token = require('./token');
 var url = require('url');
+
+var fs = require('fs');
+var modStatic = require('./static');
+
+var loginList = {};
+
+//二维码处理模块
+var img = require('./img');
+
 /**
  * 模拟阻塞的函数
  */
@@ -19,7 +28,14 @@ function sleep(milliSeconds) {
     while (new Date().getTime() < startTime + milliSeconds);
 }
 
-function getParam(query, key ) {
+/**
+ * 从query中获得参数
+ * @param {string} query    url中的query
+ * @param {string} key   query中的key
+ *
+ * return {string} 返回值 value
+ */
+function getParam(query, key) {
     var reg = new RegExp(key + '=(.+?)($|&)'); 
     var matchs = query.match(reg);
     var value = '';
@@ -29,6 +45,9 @@ function getParam(query, key ) {
 
     return value;
 }
+/**
+ * path的处理函数
+ */
 var pathHandler = {
     '/token': function (req, res, objUrl) {
         
@@ -38,11 +57,47 @@ var pathHandler = {
         res.end('token:' + sToken);
     
     },
+    '/tokenimg': function (req, res, objUrl) {
+        
+        var sid = getParam(objUrl.query, 'sid');
+        var sToken = token.create(sid);
+        res.writeHead(200, {'Content-Type': 'image/png'});
+        var urlAuth = '/check?sid=' + sid + '&token=' + sToken;
+
+        var content = img.create({ text: urlAuth });
+
+        console.log(urlAuth);
+        res.end(content);
+    
+    },
+    /**
+     * 告诉页面 他是否已经登录了
+     */
+    '/pull': function (req, res, objUrl) {
+
+        var sid = getParam(objUrl.query, 'sid');
+        var result = false;
+
+        if (loginList[sid]) {
+            result = true;
+        }
+        res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
+
+        res.end('{"result": ' + result + '}' );
+    
+    },
+
     '/check': function (req, res, objUrl) {
 
         var sid = getParam(objUrl.query, 'sid');
         var sToken = getParam(objUrl.query, 'token');
         var result = token.check(sid, sToken);
+        if (result) {
+            loginList[sid] = new Date(); 
+        }
+        else {
+            loginList[sid] = null; 
+        }
         res.writeHead(200, {'Content-Type': 'text/plain;charset=utf-8'});
         res.end('您的验证结果:' + result);
     
@@ -53,19 +108,33 @@ var pathHandler = {
  * create a server
  */
 
+var regStatic = /^(?:\/).+(html|css|png|gif|js)$/;
+
 http.createServer(function (req, res) {
     var objUrl = url.parse(req.url);
-    console.log(objUrl);
+    //console.log(objUrl);
      
     var pathname = objUrl.pathname;
-    //path处理
+
+    objUrl.query = objUrl.query || '';
+    var resFile = null;
+    // 可以匹配到 处理函数 就用pathHanlder处理
     if (pathHandler[pathname]) {
         pathHandler[pathname].call(null, req, res, objUrl);
     }
     else {
 
-        res.writeHead(404, {'Content-Type': 'text/plain'});
-        res.end('not found 404');
+        resFile = pathname.match(regStatic);
+        resFile = resFile && resFile[0].replace(/^\//, '');
+        //static files 处理
+        if (resFile) {
+            modStatic.handle(req, res, resFile ); 
+        }
+        //404 lala...
+        else {
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end('not found 404');
+        }
     }
   
 }).listen(port, '127.0.0.1');

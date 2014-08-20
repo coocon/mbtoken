@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>欢迎来到登陆页面</title>
+
+<link  rel="stylesheet" href="bootstrap.min.css">
+<script  src="jquery.min.js"></script>
+<style>
+.wrap {
+    margin-top: 20px;
+}
+.code-img img {
+    height: 200px;
+    width: 300px;
+}
+</style>
+</head>
+<body>
+<div class="wrap container">
+    <form class="form-horizontal" role="form" id="form-add">
+        <div class="form-group group-account">
+            <label for="txt-accountName" class="col-sm-2 control-label">登录名:</label>
+            <div class="col-sm-4">
+                <div class="subname" style="">
+                    <input name="childname" type="text" class="form-control input-sm" id="txt-username" placeholder="请输入账户名">
+                </div>
+            </div>
+            <div class="col-sm-1">
+
+                <a class="btn btn-default btn-sm" id="btn-code">点击获取验证码</a>
+            </div>
+        </div>
+        <div class="form-group group-account">
+            <label for="txt-accountName" class="col-sm-2 control-label">登录名:</label>
+            <div class="col-sm-4">
+                <div class="code-img" style="">
+                    <img src="/tokenimg"  class="img-rounded" />
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+
+var USERNAME = 'test';
+
+var  URL_PULL_STATUS = '/pull'
+var  URL_IMG = '/tokenimg';
+
+var TIMESPAN = 3000;
+var timer = null;
+//获取用户输入的名称
+function getUsername () {
+    var name = $.trim($('#txt-username').val()) || USERNAME;
+    
+    return  name;
+}
+/*
+* 轮训 拉取登录的状态， 因为通过手机验证的身份
+*/
+function pullLoginStatus() {
+    var name = getUsername();
+    var url = URL_PULL_STATUS;
+    $.get(url, {
+        sid: name      
+    }, function(data) {
+        if (data && data.result) {
+            console.log('success'); 
+            // clear timer
+            clearInterval(timer);
+            timer = null;
+        } 
+        else {
+            console.log('fail'); 
+        } 
+    });
+}
+
+function startPull() {
+    timer = setInterval(pullLoginStatus, TIMESPAN);
+}
+
+/**
+*
+* 绑定事件
+*/
+function bindEvent() {
+    // code for create img    
+    $('#btn-code').click(function () {
+        var img = $('img');
+        var name = getUsername();
+        var src = URL_IMG + '?sid=' + name + '&t=' + new Date().getTime();
+        img.attr('src', src);
+       
+    });        
+
+
+
+    $('#img-code').click(function () {
+
+    });
+   
+}
+
+$(document).ready(function () {
+        
+
+ 
+    
+    function init() {
+        startPull();
+        bindEvent();
+    }
+
+    init();
+
+
+});
+</script>
+
+</body>
+</html>

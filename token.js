@@ -5,7 +5,7 @@
 
 var crypto = require('crypto');
 //时间间隔
-var TIME_SPAN = 30000;
+var TIME_SPAN = 30;
 //盐巴
 var SALT = 'COOCON';
 
