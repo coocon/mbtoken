@@ -19,7 +19,9 @@ var loginList = {};
 
 //二维码处理模块
 var img = require('./img');
+var ip = require('node-ip');
 
+var localIp = '127.0.0.1';
 /**
  * 模拟阻塞的函数
  */
@@ -64,10 +66,15 @@ var pathHandler = {
         res.writeHead(200, {'Content-Type': 'image/png'});
         var urlAuth = '/check?sid=' + sid + '&token=' + sToken;
 
+        localIp = ip.address();
+        var prefix = 'http://' + localIp + ':' + port;
+
+        urlAuth = prefix + urlAuth;
         var content = img.create({ text: urlAuth });
 
         console.log(urlAuth);
-        res.end(content);
+        res.write(content);
+        res.end();
     
     },
     /**
@@ -137,7 +144,7 @@ http.createServer(function (req, res) {
         }
     }
   
-}).listen(port, '127.0.0.1');
+}).listen(port, localIp);
 
-console.log('Server running at http://127.0.0.1:' + port + '/');
+console.log('Server running at' + localIp +':' + port + '/');
 

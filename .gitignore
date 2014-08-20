@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 _Store
 *.log
 .DS_Store
@@ -30,3 +31,7 @@ cairo-1.12.16
 *.tar 
 *.zip 
 
+=======
+node_modules/
+npm-debug.log
+>>>>>>> c26e654347aaad70906aa1f03a58578d5b9f294c
