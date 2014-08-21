@@ -98,7 +98,10 @@ var pathHandler = {
 
         var longPullTime = 20000;
         if (loginList[sid]) {
+            //如果是正确的 就马上返回吧
             result = true;
+            loginList[sid] = null;
+            longPullTime = 0;
         }
 
         doAfter(function () {
@@ -129,6 +132,7 @@ var pathHandler = {
         }
         else {
             loginList[sid] = null; 
+            console.log('set login list id:', sid, 'to null');
         }
         res.writeHead(200, {'Content-Type': 'text/plain;charset=utf-8'});
         res.end('您的验证结果:' + result);
@@ -161,7 +165,7 @@ http.createServer(function (req, res) {
         resFile = resFile && resFile[0].replace(/^\//, '');
         //static files 处理
         if (resFile) {
-            modStatic.handle(req, res, resFile ); 
+            modStatic.handle(req, res, resFile); 
         }
         //404 lala...
         else {

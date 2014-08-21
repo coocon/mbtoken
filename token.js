@@ -88,10 +88,10 @@ function create(sid, timeSpan) {
 function check(sid, token) {
     var result = false;
 
-    console.log('tokenList:', tokenList, 'sid:' + sid, 'token:', token, result);
     if (tokenList[sid] == token) {
         result = true; 
     }
+    console.log('tokenList:', tokenList, 'sid:' + sid, 'token:', token, result);
     return result;
 }
 

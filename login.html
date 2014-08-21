@@ -27,7 +27,6 @@
                 </div>
             </div>
             <div class="col-sm-1">
-
                 <a class="btn btn-default btn-sm" id="btn-code">点击获取验证码</a>
             </div>
         </div>
@@ -78,19 +77,28 @@ function getUsername () {
 function pullLoginStatus() {
     var name = getUsername();
     var url = URL_PULL_STATUS;
-    $.get(url, {
-        sid: name      
-    }, function(data) {
-        if (data && data.result) {
-            // clear timer
-            alert('login success:' + name ); 
+    $.ajax({
+        url: url,
+        method: 'get',
+        data: {
+            sid: name 
+        },
+        success: function(data) {
+            if (data && data.result) {
+                // clear timer
+                alert('login success:' + name ); 
 
-        } 
-        else {
-            console.log('fail'); 
-        } 
+            } 
+            else {
+                console.log('fail'); 
+            } 
 
-        pullLoginStatus();
+            pullLoginStatus();
+        },
+        error: function () {
+
+            setTimeout(pullLoginStatus, 5000);
+        }
     });
 }
 
