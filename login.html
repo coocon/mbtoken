@@ -83,13 +83,14 @@ function pullLoginStatus() {
     }, function(data) {
         if (data && data.result) {
             // clear timer
-            clearInterval(timer);
-            timer = null;
             alert('login success:' + name ); 
+
         } 
         else {
             console.log('fail'); 
         } 
+
+        pullLoginStatus();
     });
 }
 
@@ -125,8 +126,11 @@ function getLastTime() {
 
 }
 
+/**
+* 开始寻轮状态
+*/
 function startPull() {
-    timer = setInterval(pullLoginStatus, TIMESPAN);
+    pullLoginStatus();
 }
 
 function refreashImg() {

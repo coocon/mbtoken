@@ -22,6 +22,7 @@ var img = require('./img');
 var ip = require('node-ip');
 
 var localIp = '127.0.0.1';
+var blank = function () {};
 
 /**
  * 模拟阻塞的函数
@@ -31,6 +32,15 @@ function sleep(milliSeconds) {
     while (new Date().getTime() < startTime + milliSeconds);
 }
 
+/**
+ * 简单的异步
+ */
+function doAfter(fun, milliSeconds) {
+    
+    fun = fun || blank;
+    setTimeout(fun, milliSeconds);
+
+}
 /**
  * 从query中获得参数
  * @param {string} query    url中的query
@@ -86,13 +96,18 @@ var pathHandler = {
         var sid = getParam(objUrl.query, 'sid');
         var result = false;
 
+        var longPullTime = 20000;
         if (loginList[sid]) {
             result = true;
         }
-        res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
 
-        res.end('{"result": ' + result + '}' );
-    
+        doAfter(function () {
+            res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
+            res.end('{"result": ' + result + '}' );
+
+        }, longPullTime);
+
+           
     },
     '/lasttime': function (req, res, objUrl) {
         var sid = getParam(objUrl.query, 'sid');
