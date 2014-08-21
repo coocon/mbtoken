@@ -4,8 +4,8 @@
  */
 
 var crypto = require('crypto');
-//时间间隔
-var TIME_SPAN = 30;
+//时间间隔ms
+var TIME_SPAN = 30000;
 //盐巴
 var SALT = 'COOCON';
 
@@ -18,6 +18,8 @@ var TOKEN_LENGTH = 6;
 
 //token的字典
 var tokenList = {};
+//过期时间字典
+var timeList = {};
 
 
 /**
@@ -75,6 +77,7 @@ function create(sid, timeSpan) {
     var hex = createToken(sid, timeSpan);
     var token  = transformToken(hex);
     tokenList[sid] = token;
+    timeList[sid] = new Date().getTime() + TIME_SPAN ;
 
     return token;
 }
@@ -86,10 +89,27 @@ function check(sid, token) {
     var result = false;
     if (tokenList[sid] == token) {
         result = true; 
+        timeList[sid] = null;
     }
     console.log(tokenList, 'sid:' + sid, token, result);
     return result;
 }
 
+/**
+ *
+ */
+function getLastTime(sid) {
+
+    var expiresTime = timeList[sid];
+    var left = 0;
+    var now = new Date().getTime();
+    if (expiresTime && expiresTime - now > 0) {
+        left = ((expiresTime - now) / 1000 ) | 0;
+    }
+    
+    return left;
+}
+
 exports.create = create;
 exports.check = check;
+exports.getLastTime = getLastTime;

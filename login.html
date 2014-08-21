@@ -23,7 +23,7 @@
             <label for="txt-accountName" class="col-sm-2 control-label">登录名:</label>
             <div class="col-sm-4">
                 <div class="subname" style="">
-                    <input name="childname" type="text" class="form-control input-sm" id="txt-username" placeholder="请输入账户名">
+                    <input name="childname" value="guest" type="text" class="form-control input-sm" id="txt-username" placeholder="请输入账户名">
                 </div>
             </div>
             <div class="col-sm-1">
@@ -32,14 +32,23 @@
             </div>
         </div>
         <div class="form-group group-account">
-            <label for="txt-accountName" class="col-sm-2 control-label">登录名:</label>
+            <label for="txt-accountName" class="col-sm-2 control-label">微信扫描:</label>
             <div class="col-sm-4">
                 <div class="code-img" style="">
-                    <img src="/tokenimg"  class="img-rounded" />
+                    <img src="#"  class="img-rounded" />
                 </div>
             </div>
         </div>
 
+        <div class="form-group group-account">
+            <label for="txt-accountName" class="col-sm-2 control-label">有效时间剩余:</label>
+            <div class="col-sm-2">
+                <span style="float:right;height:30px;line-height: 30px;">秒</span>
+                <div class="subname" style="overflow:hidden;">
+                    <input type="text" class="form-control input-sm" id="txt-lastTime" placeholder="剩余时间">
+                </div>
+            </div>
+        </div>
     </form>
 </div>
 
@@ -48,10 +57,15 @@
 var USERNAME = 'test';
 
 var  URL_PULL_STATUS = '/pull'
+var URL_LAST_TIME = '/lasttime'
 var  URL_IMG = '/tokenimg';
 
 var TIMESPAN = 3000;
 var timer = null;
+var txtTime = $('#txt-lastTime');
+
+var whichTime = 1;
+
 //获取用户输入的名称
 function getUsername () {
     var name = $.trim($('#txt-username').val()) || USERNAME;
@@ -68,10 +82,10 @@ function pullLoginStatus() {
         sid: name      
     }, function(data) {
         if (data && data.result) {
-            console.log('success'); 
             // clear timer
             clearInterval(timer);
             timer = null;
+            alert('login success:' + name ); 
         } 
         else {
             console.log('fail'); 
@@ -79,10 +93,54 @@ function pullLoginStatus() {
     });
 }
 
+
+function showTime(total, which) {
+    //如果重新请求了，以前的就不能跑了
+    if ( whichTime != which) {
+        return;
+    }
+    txtTime.val(total);
+    if (total > 0) {
+        total -= 1;     
+        setTimeout(function () {
+              showTime(total, which);  
+        }, 1000);
+    }
+}
+/**
+  * 获取token的剩余可用时间
+  */
+function getLastTime() {
+    var name = getUsername();
+    var url = URL_LAST_TIME;
+    whichTime +=1;
+    $.get(url, {
+        sid: name      
+    }, function(data) {
+        if (data) {
+            showTime(data.lastTime, whichTime);
+        } 
+         
+    });
+
+}
+
 function startPull() {
     timer = setInterval(pullLoginStatus, TIMESPAN);
 }
 
+function refreashImg() {
+    var img = $('img');
+    var name = getUsername();
+    var src = URL_IMG + '?sid=' + name + '&t=' + new Date().getTime();
+    img[0].onload  =  function () {
+        //获取剩余时间
+        getLastTime(); 
+
+    };
+    img.attr('src', src);
+
+}
 /**
 *
 * 绑定事件
@@ -90,11 +148,7 @@ function startPull() {
 function bindEvent() {
     // code for create img    
     $('#btn-code').click(function () {
-        var img = $('img');
-        var name = getUsername();
-        var src = URL_IMG + '?sid=' + name + '&t=' + new Date().getTime();
-        img.attr('src', src);
-       
+        refreashImg();
     });        
 
 
@@ -105,14 +159,21 @@ function bindEvent() {
    
 }
 
+//init view
+function initView() {
+    var random = 'guest:' + (Math.random() * 100000 | 0);
+     name = $('#txt-username').val(random);
+    
+
+}
 $(document).ready(function () {
         
-
- 
     
     function init() {
+        initView();
         startPull();
         bindEvent();
+        refreashImg();
     }
 
     init();

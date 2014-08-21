@@ -8,7 +8,7 @@
  */
 
 var http = require('http');
-var port = 10001;
+var port = 8010;
 var token = require('./token');
 var url = require('url');
 
@@ -93,7 +93,16 @@ var pathHandler = {
         res.end('{"result": ' + result + '}' );
     
     },
+    '/lasttime': function (req, res, objUrl) {
+        var sid = getParam(objUrl.query, 'sid');
 
+        var lastTime = token.getLastTime(sid);
+
+        res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
+
+        res.end('{"lastTime": ' + lastTime + '}' );
+
+    },
     '/check': function (req, res, objUrl) {
 
         var sid = getParam(objUrl.query, 'sid');
@@ -144,7 +153,7 @@ http.createServer(function (req, res) {
         }
     }
   
-}).listen(port, localIp);
+}).listen(port, '0.0.0.0');
 
 console.log('Server running at' + localIp +':' + port + '/');
 
