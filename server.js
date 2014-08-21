@@ -22,6 +22,7 @@ var img = require('./img');
 var ip = require('node-ip');
 
 var localIp = '127.0.0.1';
+
 /**
  * 模拟阻塞的函数
  */
@@ -132,7 +133,8 @@ http.createServer(function (req, res) {
      
     var pathname = objUrl.pathname;
 
-    objUrl.query = objUrl.query || '';
+    objUrl.query = decodeURIComponent(objUrl.query || '');
+
     var resFile = null;
     // 可以匹配到 处理函数 就用pathHanlder处理
     if (pathHandler[pathname]) {

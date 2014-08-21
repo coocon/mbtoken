@@ -87,11 +87,13 @@ function create(sid, timeSpan) {
  */
 function check(sid, token) {
     var result = false;
+
+    console.log(tokenList, 'sid:' + sid, token, result);
     if (tokenList[sid] == token) {
         result = true; 
-        timeList[sid] = null;
+        delete tokenList[sid];
+        delete timeList[sid];
     }
-    console.log(tokenList, 'sid:' + sid, token, result);
     return result;
 }
 
